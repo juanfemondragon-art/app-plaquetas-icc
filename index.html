@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Generador de Plaquetas ICC</title>
+
+  <!-- Estilos principales -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Favicon e íconos de la aplicación -->
+  <link rel="icon" type="image/png" href="icons/favicon.png" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+
+  <!-- Manifest para instalar como aplicación -->
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- Color de tema para navegador/app -->
+  <meta name="theme-color" content="#f97316" />
+</head>
+<body>
+
+  <main class="app-container">
+
+    <section class="form-section">
+      <h1>Generador de Plaquetas ICC</h1>
+
+      <p class="intro">
+        Ingrese la información de la máquina para generar la plaqueta.
+      </p>
+
+      <form id="plateForm">
+
+        <label for="modelo">Modelo</label>
+        <input type="text" id="modelo" placeholder="Ej: SE220LC" />
+
+        <label for="potencia">Potencia del motor</label>
+        <input type="text" id="potencia" placeholder="Ej: 145" />
+
+        <label for="peso">Peso del equipo</label>
+        <input type="text" id="peso" placeholder="Ej: 22800" />
+
+        <label for="capacidad">Capacidad</label>
+        <input type="text" id="capacidad" placeholder="Ej: 0.95" />
+
+        <label for="anio">Año de manufacturación</label>
+        <input type="text" id="anio" placeholder="Ej: 2024" />
+
+        <label for="pin">Número de identificación de producto</label>
+        <input type="text" id="pin" placeholder="Ej: 66SE22DKNR1018769" />
+
+        <button type="submit">
+          Generar plaqueta
+        </button>
+      </form>
+
+      <button id="loadTemplate" class="secondary-button" type="button">
+        Cargar plantilla SVG
+      </button>
+
+      <button id="downloadSvg" class="secondary-button" type="button" disabled>
+        Descargar SVG
+      </button>
+
+      <button id="downloadPdf" class="secondary-button" type="button" disabled>
+        Generar PDF
+      </button>
+
+      <hr />
+
+      <h3>Carga masiva</h3>
+
+      <p class="intro">
+        Suba un archivo CSV para generar varias plaquetas al tiempo.
+      </p>
+
+      <label for="csvFile">Archivo CSV</label>
+      <input type="file" id="csvFile" accept=".csv" />
+
+      <button id="processCsv" class="secondary-button" type="button">
+        Procesar CSV
+      </button>
+
+      <button id="downloadAllSvg" class="secondary-button" type="button" disabled>
+        Descargar ZIP con todas las plaquetas
+      </button>
+    </section>
+
+    <section class="preview-section">
+      <h2>Vista previa</h2>
+
+      <div id="platePreview" class="plate-preview">
+        <p>La plantilla SVG aparecerá aquí.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Librería para generar ZIP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <!-- Código principal de la app -->
+  <script src="app.js"></script>
+
+  <!-- Registro del Service Worker para instalar la app -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", function() {
+        navigator.serviceWorker.register("./sw.js")
+          .then(function() {
+            console.log("Service Worker registrado correctamente.");
+          })
+          .catch(function(error) {
+            console.error("Error registrando Service Worker:", error);
+          });
+      });
+    }
+  </script>
+
+</body>
+</html>
