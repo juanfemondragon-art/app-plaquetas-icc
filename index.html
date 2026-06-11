@@ -6,17 +6,11 @@
 
   <title>Generador de Plaquetas ICC</title>
 
-  <!-- Estilos principales -->
   <link rel="stylesheet" href="style.css" />
 
-  <!-- Favicon e íconos de la aplicación -->
   <link rel="icon" type="image/png" href="icons/favicon.png" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
-
-  <!-- Manifest para instalar como aplicación -->
   <link rel="manifest" href="manifest.json" />
-
-  <!-- Color de tema para navegador/app -->
   <meta name="theme-color" content="#f97316" />
 </head>
 <body>
@@ -64,16 +58,59 @@
       </button>
 
       <button id="downloadPdf" class="secondary-button" type="button" disabled>
-        Generar PDF
+        Generar PDF individual
       </button>
 
       <hr />
 
-      <h3>Carga masiva</h3>
+      <h3>Generación rápida</h3>
 
       <p class="intro">
-        Suba un archivo CSV para generar varias plaquetas al tiempo.
+        Llene hasta 10 plaquetas directamente en la app y genere archivos sin usar CSV.
       </p>
+
+      <div class="quick-table-wrapper">
+        <table class="quick-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Modelo</th>
+              <th>Potencia</th>
+              <th>Peso</th>
+              <th>Capacidad</th>
+              <th>Año</th>
+              <th>PIN</th>
+            </tr>
+          </thead>
+          <tbody id="quickRows">
+            <!-- Las 10 filas se generan automáticamente desde app.js -->
+          </tbody>
+        </table>
+      </div>
+
+      <button id="downloadQuickZip" class="secondary-button" type="button">
+        Generar ZIP desde tabla
+      </button>
+
+      <button id="downloadQuickPdf" class="secondary-button" type="button">
+        Generar PDF único desde tabla
+      </button>
+
+      <button id="clearQuickTable" class="secondary-button" type="button">
+        Limpiar tabla
+      </button>
+
+      <hr />
+
+      <h3>Carga masiva CSV</h3>
+
+      <p class="intro">
+        Descargue el formato CSV, llénelo con la información de las máquinas y súbalo para generar varias plaquetas al tiempo.
+      </p>
+
+      <button id="downloadCsvTemplate" class="secondary-button" type="button">
+        Descargar formato CSV
+      </button>
 
       <label for="csvFile">Archivo CSV</label>
       <input type="file" id="csvFile" accept=".csv" />
@@ -84,6 +121,10 @@
 
       <button id="downloadAllSvg" class="secondary-button" type="button" disabled>
         Descargar ZIP con todas las plaquetas
+      </button>
+
+      <button id="downloadCsvPdf" class="secondary-button" type="button" disabled>
+        Generar PDF único desde CSV
       </button>
     </section>
 
@@ -97,13 +138,9 @@
 
   </main>
 
-  <!-- Librería para generar ZIP -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-
-  <!-- Código principal de la app -->
   <script src="app.js"></script>
 
-  <!-- Registro del Service Worker para instalar la app -->
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", function() {

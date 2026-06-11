@@ -20,6 +20,13 @@ const downloadPdfButton = document.getElementById("downloadPdf");
 const csvFileInput = document.getElementById("csvFile");
 const processCsvButton = document.getElementById("processCsv");
 const downloadAllSvgButton = document.getElementById("downloadAllSvg");
+const downloadCsvPdfButton = document.getElementById("downloadCsvPdf");
+const downloadCsvTemplateButton = document.getElementById("downloadCsvTemplate");
+
+const quickRowsBody = document.getElementById("quickRows");
+const downloadQuickZipButton = document.getElementById("downloadQuickZip");
+const downloadQuickPdfButton = document.getElementById("downloadQuickPdf");
+const clearQuickTableButton = document.getElementById("clearQuickTable");
 
 let baseSvgText = "";
 let finalSvgText = "";
@@ -36,7 +43,9 @@ function getValue(input, defaultValue) {
 }
 
 function cleanFileName(value) {
-  return String(value).replace(/[^a-zA-Z0-9-_]/g, "_");
+  return String(value)
+    .trim()
+    .replace(/[^a-zA-Z0-9-_]/g, "_");
 }
 
 function downloadBlob(blob, fileName) {
@@ -75,6 +84,33 @@ function getRowValue(row, possibleKeys, defaultValue = "") {
 
 
 // ===============================
+// CREAR TABLA RÁPIDA DE 10 FILAS
+// ===============================
+
+function createQuickTableRows() {
+  if (!quickRowsBody) return;
+
+  quickRowsBody.innerHTML = "";
+
+  for (let i = 1; i <= 10; i++) {
+    const row = document.createElement("tr");
+
+    row.innerHTML = `
+      <td>${i}</td>
+      <td><input type="text" class="quick-modelo" placeholder="Ej: SG19" /></td>
+      <td><input type="text" class="quick-potencia" placeholder="140" /></td>
+      <td><input type="text" class="quick-peso" placeholder="15400" /></td>
+      <td><input type="text" class="quick-capacidad" placeholder="3.7" /></td>
+      <td><input type="text" class="quick-anio" placeholder="2026" /></td>
+      <td><input type="text" class="quick-pin" placeholder="ABC123456789" /></td>
+    `;
+
+    quickRowsBody.appendChild(row);
+  }
+}
+
+
+// ===============================
 // CARGAR PLANTILLA SVG
 // ===============================
 
@@ -105,6 +141,7 @@ if (loadTemplateButton) {
 }
 
 window.addEventListener("DOMContentLoaded", function() {
+  createQuickTableRows();
   loadSvgTemplate(false);
 });
 
@@ -113,38 +150,42 @@ window.addEventListener("DOMContentLoaded", function() {
 // GENERAR PLAQUETA INDIVIDUAL
 // ===============================
 
-plateForm.addEventListener("submit", function(event) {
-  event.preventDefault();
+if (plateForm) {
+  plateForm.addEventListener("submit", function(event) {
+    event.preventDefault();
 
-  if (!baseSvgText) {
-    alert("Primero debes cargar la plantilla SVG.");
-    return;
-  }
+    if (!baseSvgText) {
+      alert("Primero debes cargar la plantilla SVG.");
+      return;
+    }
 
-  const modelo = getValue(modeloInput, "SE220LC");
-  const potencia = getValue(potenciaInput, "145");
-  const peso = getValue(pesoInput, "22800");
-  const capacidad = getValue(capacidadInput, "0.95");
-  const anio = getValue(anioInput, "2024");
-  const pin = getValue(pinInput, "66SE22DKNR1018769");
+    const modelo = getValue(modeloInput, "SE220LC");
+    const potencia = getValue(potenciaInput, "145");
+    const peso = getValue(pesoInput, "22800");
+    const capacidad = getValue(capacidadInput, "0.95");
+    const anio = getValue(anioInput, "2024");
+    const pin = getValue(pinInput, "66SE22DKNR1018769");
 
-  finalSvgText = insertVariableTexts(baseSvgText, {
-    modelo,
-    potencia,
-    peso,
-    capacidad,
-    anio,
-    pin
+    finalSvgText = insertVariableTexts(baseSvgText, {
+      modelo,
+      potencia,
+      peso,
+      capacidad,
+      anio,
+      pin
+    });
+
+    platePreview.innerHTML = finalSvgText;
+
+    if (downloadSvgButton) {
+      downloadSvgButton.disabled = false;
+    }
+
+    if (downloadPdfButton) {
+      downloadPdfButton.disabled = false;
+    }
   });
-
-  platePreview.innerHTML = finalSvgText;
-
-  downloadSvgButton.disabled = false;
-
-  if (downloadPdfButton) {
-    downloadPdfButton.disabled = false;
-  }
-});
+}
 
 
 // ===============================
@@ -163,12 +204,12 @@ function insertVariableTexts(svgText, data) {
   }
 
   const replacements = {
-    "{{MODELO}}": data.modelo,
-    "{{POTENCIA}}": data.potencia,
-    "{{PESO}}": data.peso,
-    "{{CAPACIDAD}}": data.capacidad,
-    "{{ANIO}}": data.anio,
-    "{{PIN}}": `>${data.pin}<`
+    "{{MODELO}}": data.modelo || "",
+    "{{POTENCIA}}": data.potencia || "",
+    "{{PESO}}": data.peso || "",
+    "{{CAPACIDAD}}": data.capacidad || "",
+    "{{ANIO}}": data.anio || "",
+    "{{PIN}}": `>${data.pin || ""}<`
   };
 
   const textElements = svgDoc.querySelectorAll("text, tspan");
@@ -216,25 +257,27 @@ function insertVariableTexts(svgText, data) {
 // DESCARGAR SVG INDIVIDUAL
 // ===============================
 
-downloadSvgButton.addEventListener("click", function() {
-  if (!finalSvgText) {
-    alert("Primero genera la plaqueta.");
-    return;
-  }
+if (downloadSvgButton) {
+  downloadSvgButton.addEventListener("click", function() {
+    if (!finalSvgText) {
+      alert("Primero genera la plaqueta.");
+      return;
+    }
 
-  const modelo = cleanFileName(getValue(modeloInput, "SE220LC"));
-  const pin = cleanFileName(getValue(pinInput, "SIN_PIN"));
+    const modelo = cleanFileName(getValue(modeloInput, "SE220LC"));
+    const pin = cleanFileName(getValue(pinInput, "SIN_PIN"));
 
-  const svgBlob = new Blob([finalSvgText], {
-    type: "image/svg+xml;charset=utf-8"
+    const svgBlob = new Blob([finalSvgText], {
+      type: "image/svg+xml;charset=utf-8"
+    });
+
+    downloadBlob(svgBlob, `plaqueta_${modelo}_${pin}.svg`);
   });
-
-  downloadBlob(svgBlob, `plaqueta_${modelo}_${pin}.svg`);
-});
+}
 
 
 // ===============================
-// GENERAR PDF DESDE NAVEGADOR
+// GENERAR PDF INDIVIDUAL
 // ===============================
 
 if (downloadPdfButton) {
@@ -244,58 +287,28 @@ if (downloadPdfButton) {
       return;
     }
 
-    const printWindow = window.open("", "_blank");
+    generateMultiPlatePdfFromSvgList([finalSvgText], "Plaqueta PDF");
+  });
+}
 
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html lang="es">
-      <head>
-        <meta charset="UTF-8">
-        <title>Plaqueta PDF</title>
-        <style>
-          @page {
-            size: 115mm 70mm;
-            margin: 0;
-          }
 
-          body {
-            margin: 0;
-            padding: 0;
-            background: #ffffff;
-          }
+// ===============================
+// DESCARGAR FORMATO CSV
+// ===============================
 
-          .pdf-wrapper {
-            width: 115mm;
-            height: 70mm;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          }
+if (downloadCsvTemplateButton) {
+  downloadCsvTemplateButton.addEventListener("click", function() {
+    const csvTemplate = [
+      "MODELO;POTENCIA;PESO;CAPACIDAD;ANIO;PIN",
+      "SG19;140;15400;3.7;2026;ABC123456789",
+      "SE220LC;145;22800;0.95;2024;66SE22DKNR1018769"
+    ].join("\n");
 
-          svg {
-            width: 115mm;
-            height: 70mm;
-            display: block;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="pdf-wrapper">
-          ${finalSvgText}
-        </div>
+    const csvBlob = new Blob(["\uFEFF" + csvTemplate], {
+      type: "text/csv;charset=utf-8"
+    });
 
-        <script>
-          window.onload = function() {
-            setTimeout(function() {
-              window.print();
-            }, 500);
-          };
-        <\/script>
-      </body>
-      </html>
-    `);
-
-    printWindow.document.close();
+    downloadBlob(csvBlob, "formato_plaquetas_icc.csv");
   });
 }
 
@@ -332,6 +345,10 @@ if (processCsvButton) {
 
       if (downloadAllSvgButton) {
         downloadAllSvgButton.disabled = false;
+      }
+
+      if (downloadCsvPdfButton) {
+        downloadCsvPdfButton.disabled = false;
       }
 
       alert(`CSV procesado correctamente. Se encontraron ${csvRows.length} plaquetas.`);
@@ -447,7 +464,7 @@ function getPlateDataFromRow(row, index) {
 
 
 // ===============================
-// DESCARGAR ZIP CON TODAS LAS PLAQUETAS SVG
+// DESCARGAR ZIP CON TODAS LAS PLAQUETAS SVG DESDE CSV
 // ===============================
 
 if (downloadAllSvgButton) {
@@ -471,7 +488,6 @@ if (downloadAllSvgButton) {
 
     csvRows.forEach(function(row, index) {
       const plateData = getPlateDataFromRow(row, index);
-
       const svgContent = insertVariableTexts(baseSvgText, plateData);
 
       const cleanModelo = cleanFileName(plateData.modelo);
@@ -486,8 +502,273 @@ if (downloadAllSvgButton) {
       type: "blob"
     });
 
-    downloadBlob(zipBlob, "plaquetas_generadas.zip");
+    downloadBlob(zipBlob, "plaquetas_generadas_csv.zip");
 
     alert(`ZIP generado correctamente con ${csvRows.length} plaquetas.`);
+  });
+}
+
+
+// ===============================
+// LEER TABLA RÁPIDA
+// ===============================
+
+function getQuickTableRows() {
+  const rows = document.querySelectorAll("#quickRows tr");
+  const data = [];
+
+  rows.forEach(function(row, index) {
+    const modeloInput = row.querySelector(".quick-modelo");
+    const potenciaInput = row.querySelector(".quick-potencia");
+    const pesoInput = row.querySelector(".quick-peso");
+    const capacidadInput = row.querySelector(".quick-capacidad");
+    const anioInput = row.querySelector(".quick-anio");
+    const pinInput = row.querySelector(".quick-pin");
+
+    if (!modeloInput || !potenciaInput || !pesoInput || !capacidadInput || !anioInput || !pinInput) {
+      return;
+    }
+
+    const modelo = modeloInput.value.trim();
+    const potencia = potenciaInput.value.trim();
+    const peso = pesoInput.value.trim();
+    const capacidad = capacidadInput.value.trim();
+    const anio = anioInput.value.trim();
+    const pin = pinInput.value.trim();
+
+    const hasAnyValue = modelo || potencia || peso || capacidad || anio || pin;
+
+    if (hasAnyValue) {
+      data.push({
+        modelo: modelo || "SIN_MODELO",
+        potencia,
+        peso,
+        capacidad,
+        anio,
+        pin: pin || `SIN_PIN_${index + 1}`
+      });
+    }
+  });
+
+  return data;
+}
+
+
+// ===============================
+// DESCARGAR ZIP DESDE TABLA RÁPIDA
+// ===============================
+
+if (downloadQuickZipButton) {
+  downloadQuickZipButton.addEventListener("click", async function() {
+    if (!baseSvgText) {
+      alert("Primero debes cargar la plantilla SVG.");
+      return;
+    }
+
+    if (typeof JSZip === "undefined") {
+      alert("No se pudo cargar JSZip. Revisa tu conexión a internet.");
+      return;
+    }
+
+    const quickRows = getQuickTableRows();
+
+    if (quickRows.length === 0) {
+      alert("Debes llenar al menos una fila de la tabla.");
+      return;
+    }
+
+    const zip = new JSZip();
+
+    quickRows.forEach(function(plateData, index) {
+      const svgContent = insertVariableTexts(baseSvgText, plateData);
+
+      const cleanModelo = cleanFileName(plateData.modelo);
+      const cleanPin = cleanFileName(plateData.pin);
+
+      const fileName = `plaqueta_${index + 1}_${cleanModelo}_${cleanPin}.svg`;
+
+      zip.file(fileName, svgContent);
+    });
+
+    const zipBlob = await zip.generateAsync({
+      type: "blob"
+    });
+
+    downloadBlob(zipBlob, "plaquetas_tabla_rapida.zip");
+
+    alert(`ZIP generado correctamente con ${quickRows.length} plaquetas.`);
+  });
+}
+
+
+// ===============================
+// LIMPIAR TABLA RÁPIDA
+// ===============================
+
+if (clearQuickTableButton) {
+  clearQuickTableButton.addEventListener("click", function() {
+    const inputs = document.querySelectorAll("#quickRows input");
+
+    inputs.forEach(function(input) {
+      input.value = "";
+    });
+
+    alert("Tabla limpiada correctamente.");
+  });
+}
+
+
+// ===============================
+// GENERAR PDF ÚNICO CON VARIAS PLAQUETAS
+// ===============================
+
+function generateMultiPlatePdfFromSvgList(svgList, fileTitle = "Plaquetas PDF") {
+  if (!svgList || svgList.length === 0) {
+    alert("No hay plaquetas para generar.");
+    return;
+  }
+
+  const svgPages = svgList.map(function(svgContent) {
+    return `
+      <section class="pdf-page">
+        ${svgContent}
+      </section>
+    `;
+  }).join("");
+
+  const printWindow = window.open("", "_blank");
+
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+      <meta charset="UTF-8">
+      <title>${fileTitle}</title>
+      <style>
+        @page {
+          size: 115mm 70mm;
+          margin: 0;
+        }
+
+        * {
+          box-sizing: border-box;
+        }
+
+        html,
+        body {
+          margin: 0;
+          padding: 0;
+          background: #ffffff;
+        }
+
+        .pdf-page {
+          width: 115mm;
+          height: 70mm;
+          page-break-after: always;
+          break-after: page;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+        }
+
+        .pdf-page:last-child {
+          page-break-after: auto;
+          break-after: auto;
+        }
+
+        svg {
+          width: 115mm;
+          height: 70mm;
+          display: block;
+        }
+
+        @media print {
+          body {
+            margin: 0;
+          }
+
+          .pdf-page {
+            page-break-after: always;
+            break-after: page;
+          }
+
+          .pdf-page:last-child {
+            page-break-after: auto;
+            break-after: auto;
+          }
+        }
+      </style>
+    </head>
+    <body>
+      ${svgPages}
+
+      <script>
+        window.onload = function() {
+          setTimeout(function() {
+            window.print();
+          }, 700);
+        };
+      <\/script>
+    </body>
+    </html>
+  `);
+
+  printWindow.document.close();
+}
+
+function generateMultiPlatePdf(platesData, fileTitle = "Plaquetas PDF") {
+  if (!baseSvgText) {
+    alert("Primero debes cargar la plantilla SVG.");
+    return;
+  }
+
+  if (!platesData || platesData.length === 0) {
+    alert("No hay plaquetas para generar.");
+    return;
+  }
+
+  const svgList = platesData.map(function(plateData) {
+    return insertVariableTexts(baseSvgText, plateData);
+  });
+
+  generateMultiPlatePdfFromSvgList(svgList, fileTitle);
+}
+
+
+// ===============================
+// PDF ÚNICO DESDE TABLA RÁPIDA
+// ===============================
+
+if (downloadQuickPdfButton) {
+  downloadQuickPdfButton.addEventListener("click", function() {
+    const quickRows = getQuickTableRows();
+
+    if (quickRows.length === 0) {
+      alert("Debes llenar al menos una fila de la tabla.");
+      return;
+    }
+
+    generateMultiPlatePdf(quickRows, "Plaquetas desde tabla rápida");
+  });
+}
+
+
+// ===============================
+// PDF ÚNICO DESDE CSV
+// ===============================
+
+if (downloadCsvPdfButton) {
+  downloadCsvPdfButton.addEventListener("click", function() {
+    if (!csvRows || csvRows.length === 0) {
+      alert("Primero debes procesar un CSV.");
+      return;
+    }
+
+    const platesData = csvRows.map(function(row, index) {
+      return getPlateDataFromRow(row, index);
+    });
+
+    generateMultiPlatePdf(platesData, "Plaquetas desde CSV");
   });
 }
