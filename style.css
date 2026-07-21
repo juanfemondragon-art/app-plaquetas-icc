@@ -342,5 +342,55 @@ input[type="file"] {
   .plate-preview {
     min-height: 280px;
     padding: 14px;
+
+     .template-selector-wrap {
+  margin-bottom: 18px;
+}
+
+.template-selector-wrap select {
+  width: 100%;
+  padding: 12px 13px;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  font-size: 14px;
+  outline: none;
+  background: #ffffff;
+  color: #111827;
+}
+
+.dynamic-form-fields {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.dynamic-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.dynamic-field label {
+  margin-bottom: 6px !important;
+}
+
+.quick-table-actions,
+.csv-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 12px;
+}
+
+@media (max-width: 900px) {
+  .dynamic-form-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-table-actions,
+  .csv-actions {
+    grid-template-columns: 1fr;
+  }
+}
   }
 }
