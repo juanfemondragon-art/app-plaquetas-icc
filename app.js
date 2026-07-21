@@ -462,30 +462,30 @@ function positionEquipoFrontalText(element, fieldKey) {
   element.removeAttribute("transform");
 
   if (fieldKey === "PRODUCTO") {
-    element.setAttribute("x", "87.8");
-    element.setAttribute("y", "81.3");
+    element.setAttribute("x", "72");
+    element.setAttribute("y", "82");
     element.setAttribute("text-anchor", "start");
-    element.setAttribute("font-size", "10.8");
+    element.setAttribute("font-size", "12.8");
     element.setAttribute("font-weight", "700");
-    element.setAttribute("textLength", "145");
-    element.setAttribute("lengthAdjust", "spacingAndGlyphs");
+    element.setAttribute("textLength", "178");
+    element.setAttribute("lengthAdjust", "spacing");
   }
 
   if (fieldKey === "SERIAL") {
-    element.setAttribute("x", "96.5");
-    element.setAttribute("y", "94.3");
+    element.setAttribute("x", "87");
+    element.setAttribute("y", "96");
     element.setAttribute("text-anchor", "start");
-    element.setAttribute("font-size", "11.2");
+    element.setAttribute("font-size", "13.4");
     element.setAttribute("font-weight", "900");
-    element.setAttribute("textLength", "100");
-    element.setAttribute("lengthAdjust", "spacingAndGlyphs");
+    element.setAttribute("textLength", "135");
+    element.setAttribute("lengthAdjust", "spacing");
   }
 
   if (fieldKey === "TIPO") {
     element.setAttribute("x", "263");
-    element.setAttribute("y", "101.8");
+    element.setAttribute("y", "102");
     element.setAttribute("text-anchor", "end");
-    element.setAttribute("font-size", "7.8");
+    element.setAttribute("font-size", "8.4");
     element.setAttribute("font-weight", "600");
     element.removeAttribute("textLength");
     element.removeAttribute("lengthAdjust");
