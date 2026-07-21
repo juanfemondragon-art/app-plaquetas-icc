@@ -414,6 +414,8 @@ function getFontSettingsForField(fieldKey) {
 
     if (fieldKey === "SERIAL") {
       fontWeight = "900";
+    } else if (fieldKey === "PRODUCTO") {
+      fontWeight = "700";
     } else {
       fontWeight = "600";
     }
@@ -427,31 +429,6 @@ function getFontSettingsForField(fieldKey) {
   return {
     fontFamily,
     fontWeight
-  };
-}
-
-function getSvgViewBoxSize(element) {
-  const svgRoot = element.ownerDocument.querySelector("svg");
-
-  let width = 1150;
-  let height = 700;
-
-  if (svgRoot) {
-    const viewBox = svgRoot.getAttribute("viewBox");
-
-    if (viewBox) {
-      const parts = viewBox.split(/\s+/).map(Number);
-
-      if (parts.length === 4) {
-        if (!isNaN(parts[2])) width = parts[2];
-        if (!isNaN(parts[3])) height = parts[3];
-      }
-    }
-  }
-
-  return {
-    width,
-    height
   };
 }
 
@@ -479,39 +456,39 @@ function applyFontToElement(element, fieldKey) {
   } else {
     element.setAttribute("style", `font-family:'${primaryFont}', Arial, sans-serif;font-weight:${fontWeight};`);
   }
+}
 
-  // Ajustes especiales para la plaqueta de equipo frontal.
-  // Estos valores centran y comprimen el texto para que no se salga del margen.
-  if (currentTemplateKey === "equipo_frontal") {
-    const svgSize = getSvgViewBoxSize(element);
-    const viewBoxWidth = svgSize.width;
+function positionEquipoFrontalText(element, fieldKey) {
+  element.removeAttribute("transform");
 
-    if (fieldKey === "PRODUCTO") {
-      element.setAttribute("text-anchor", "middle");
-      element.setAttribute("x", viewBoxWidth * 0.62);
-      element.setAttribute("textLength", viewBoxWidth * 0.48);
-      element.setAttribute("lengthAdjust", "spacingAndGlyphs");
-      element.setAttribute("font-size", "34");
-      element.setAttribute("font-weight", "700");
-    }
+  if (fieldKey === "PRODUCTO") {
+    element.setAttribute("x", "87.8");
+    element.setAttribute("y", "81.3");
+    element.setAttribute("text-anchor", "start");
+    element.setAttribute("font-size", "10.8");
+    element.setAttribute("font-weight", "700");
+    element.setAttribute("textLength", "145");
+    element.setAttribute("lengthAdjust", "spacingAndGlyphs");
+  }
 
-    if (fieldKey === "SERIAL") {
-      element.setAttribute("text-anchor", "middle");
-      element.setAttribute("x", viewBoxWidth * 0.62);
-      element.setAttribute("textLength", viewBoxWidth * 0.36);
-      element.setAttribute("lengthAdjust", "spacingAndGlyphs");
-      element.setAttribute("font-size", "34");
-      element.setAttribute("font-weight", "900");
-    }
+  if (fieldKey === "SERIAL") {
+    element.setAttribute("x", "96.5");
+    element.setAttribute("y", "94.3");
+    element.setAttribute("text-anchor", "start");
+    element.setAttribute("font-size", "11.2");
+    element.setAttribute("font-weight", "900");
+    element.setAttribute("textLength", "100");
+    element.setAttribute("lengthAdjust", "spacingAndGlyphs");
+  }
 
-    if (fieldKey === "TIPO") {
-      element.setAttribute("text-anchor", "end");
-      element.setAttribute("x", viewBoxWidth * 0.96);
-      element.setAttribute("font-size", "24");
-      element.setAttribute("font-weight", "600");
-      element.removeAttribute("textLength");
-      element.removeAttribute("lengthAdjust");
-    }
+  if (fieldKey === "TIPO") {
+    element.setAttribute("x", "263");
+    element.setAttribute("y", "101.8");
+    element.setAttribute("text-anchor", "end");
+    element.setAttribute("font-size", "7.8");
+    element.setAttribute("font-weight", "600");
+    element.removeAttribute("textLength");
+    element.removeAttribute("lengthAdjust");
   }
 }
 
@@ -556,6 +533,10 @@ function insertVariableTexts(svgText, data) {
     if (replacedFieldKey) {
       element.textContent = content;
       applyFontToElement(element, replacedFieldKey);
+
+      if (currentTemplateKey === "equipo_frontal") {
+        positionEquipoFrontalText(element, replacedFieldKey);
+      }
     }
   });
 
