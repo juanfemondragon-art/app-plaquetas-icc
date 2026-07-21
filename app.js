@@ -450,7 +450,7 @@ function applyTemplate(templateKey, showAlert = false) {
 
 
 // ===============================
-// TIPOGRAFÍAS POR PLANTILLA
+// TIPOGRAFÍAS
 // ===============================
 
 function getFontSettingsForField(fieldKey) {
@@ -499,6 +499,7 @@ function applyFontToElement(element, fieldKey) {
     newStyle = newStyle.replace(/font-family:[^;]+;?/g, "");
     newStyle = newStyle.replace(/font-weight:[^;]+;?/g, "");
     newStyle = newStyle.replace(/text-anchor:[^;]+;?/g, "");
+    newStyle = newStyle.replace(/font-size:[^;]+;?/g, "");
 
     newStyle += `;font-family:'${primaryFont}', Arial, sans-serif;font-weight:${fontWeight};`;
 
@@ -508,43 +509,103 @@ function applyFontToElement(element, fieldKey) {
   }
 }
 
-function positionEquipoFrontalText(element, fieldKey) {
-  element.removeAttribute("transform");
-  element.removeAttribute("textLength");
-  element.removeAttribute("lengthAdjust");
+
+// ===============================
+// TEXTO NUEVO PARA EQUIPO FRONTAL
+// ===============================
+
+function hideOriginalMarkerElements(svgDoc) {
+  const textElements = svgDoc.querySelectorAll("text, tspan");
+
+  textElements.forEach(function(element) {
+    const content = element.textContent || "";
+
+    if (
+      content.includes("{{PRODUCTO}}") ||
+      content.includes("{{SERIAL}}") ||
+      content.includes("{{TIPO}}")
+    ) {
+      element.setAttribute("display", "none");
+
+      const parent = element.parentElement;
+      if (parent && parent.tagName.toLowerCase() === "g") {
+        parent.setAttribute("display", "none");
+      }
+    }
+  });
+}
+
+function createSvgText(svgDoc, options) {
+  const svgNS = "http://www.w3.org/2000/svg";
+  const text = svgDoc.createElementNS(svgNS, "text");
+
+  text.textContent = options.text || "";
+
+  text.setAttribute("x", options.x);
+  text.setAttribute("y", options.y);
+  text.setAttribute("text-anchor", options.anchor || "middle");
+  text.setAttribute("font-family", "Montserrat, Arial, sans-serif");
+  text.setAttribute("font-size", options.size);
+  text.setAttribute("font-weight", options.weight || "700");
+  text.setAttribute("fill", "#000000");
+  text.setAttribute("dominant-baseline", "middle");
+
+  text.setAttribute(
+    "style",
+    `font-family:'Montserrat', Arial, sans-serif;font-size:${options.size}px;font-weight:${options.weight || "700"};fill:#000000;`
+  );
+
+  return text;
+}
+
+function addEquipoFrontalTexts(svgDoc, data) {
+  const svgRoot = svgDoc.querySelector("svg");
+
+  if (!svgRoot) {
+    return;
+  }
+
+  hideOriginalMarkerElements(svgDoc);
 
   const productoSize = getAdjustmentValue(productoFontSizeInput, 13.5);
   const serialSize = getAdjustmentValue(serialFontSizeInput, 14);
   const tipoSize = getAdjustmentValue(tipoFontSizeInput, 8.5);
 
-  if (fieldKey === "PRODUCTO") {
-    element.setAttribute("x", "165");
-    element.setAttribute("y", "82");
-    element.setAttribute("text-anchor", "middle");
-    element.setAttribute("font-size", productoSize);
-    element.setAttribute("font-weight", "700");
-  }
+  const productoText = createSvgText(svgDoc, {
+    text: data.PRODUCTO || "",
+    x: "168",
+    y: "79",
+    anchor: "middle",
+    size: productoSize,
+    weight: "700"
+  });
 
-  if (fieldKey === "SERIAL") {
-    element.setAttribute("x", "165");
-    element.setAttribute("y", "96");
-    element.setAttribute("text-anchor", "middle");
-    element.setAttribute("font-size", serialSize);
-    element.setAttribute("font-weight", "900");
-  }
+  const serialText = createSvgText(svgDoc, {
+    text: data.SERIAL || "",
+    x: "168",
+    y: "93",
+    anchor: "middle",
+    size: serialSize,
+    weight: "900"
+  });
 
-  if (fieldKey === "TIPO") {
-    element.setAttribute("x", "263");
-    element.setAttribute("y", "102");
-    element.setAttribute("text-anchor", "end");
-    element.setAttribute("font-size", tipoSize);
-    element.setAttribute("font-weight", "600");
-  }
+  const tipoText = createSvgText(svgDoc, {
+    text: data.TIPO || "",
+    x: "263",
+    y: "101",
+    anchor: "end",
+    size: tipoSize,
+    weight: "600"
+  });
+
+  svgRoot.appendChild(productoText);
+  svgRoot.appendChild(serialText);
+  svgRoot.appendChild(tipoText);
 }
 
 
 // ===============================
-// REEMPLAZAR MARCADORES EN SVG
+// REEMPLAZAR MARCADORES
 // ===============================
 
 function insertVariableTexts(svgText, data) {
@@ -559,6 +620,13 @@ function insertVariableTexts(svgText, data) {
   }
 
   const template = getCurrentTemplate();
+
+  if (currentTemplateKey === "equipo_frontal") {
+    addEquipoFrontalTexts(svgDoc, data);
+    const serializer = new XMLSerializer();
+    return serializer.serializeToString(svgDoc);
+  }
+
   const textElements = svgDoc.querySelectorAll("text, tspan");
 
   textElements.forEach(function(element) {
@@ -583,10 +651,6 @@ function insertVariableTexts(svgText, data) {
     if (replacedFieldKey) {
       element.textContent = content;
       applyFontToElement(element, replacedFieldKey);
-
-      if (currentTemplateKey === "equipo_frontal") {
-        positionEquipoFrontalText(element, replacedFieldKey);
-      }
     }
   });
 
@@ -599,19 +663,38 @@ function insertVariableTexts(svgText, data) {
 // GENERAR VISTA PREVIA
 // ===============================
 
-function generatePreviewFromIndividualForm() {
+function generatePreviewFromData(plateData) {
   if (!baseSvgText) {
     alert("Primero debes cargar la plantilla SVG.");
     return;
   }
-
-  const plateData = collectIndividualFormData();
 
   finalSvgText = insertVariableTexts(baseSvgText, plateData);
   platePreview.innerHTML = finalSvgText;
 
   if (downloadSvgButton) downloadSvgButton.disabled = false;
   if (downloadPdfButton) downloadPdfButton.disabled = false;
+}
+
+function generatePreviewFromIndividualForm() {
+  const plateData = collectIndividualFormData();
+  generatePreviewFromData(plateData);
+}
+
+function refreshPreviewUsingBestAvailableData() {
+  updateAdjustmentLabels();
+
+  if (!baseSvgText) {
+    return;
+  }
+
+  if (csvRows && csvRows.length > 0) {
+    const firstPlateData = getPlateDataFromRow(csvRows[0], 0);
+    generatePreviewFromData(firstPlateData);
+    return;
+  }
+
+  generatePreviewFromIndividualForm();
 }
 
 
@@ -651,7 +734,7 @@ if (downloadSvgButton) {
 
 
 // ===============================
-// GENERAR PDF
+// PDF
 // ===============================
 
 function generateMultiPlatePdfFromSvgList(svgList, fileTitle = "Plaquetas PDF") {
@@ -766,7 +849,7 @@ if (downloadPdfButton) {
 
 
 // ===============================
-// DESCARGAR FORMATO CSV DINÁMICO
+// DESCARGAR FORMATO CSV
 // ===============================
 
 if (downloadCsvTemplateButton) {
@@ -790,7 +873,7 @@ if (downloadCsvTemplateButton) {
 
 
 // ===============================
-// LEER Y PROCESAR CSV / EXCEL
+// LEER CSV / EXCEL
 // ===============================
 
 if (processCsvButton) {
@@ -833,6 +916,10 @@ if (processCsvButton) {
         if (downloadCsvPdfButton) downloadCsvPdfButton.disabled = false;
 
         alert(`Archivo procesado correctamente. Se encontraron ${csvRows.length} plaquetas.`);
+
+        const firstPlateData = getPlateDataFromRow(csvRows[0], 0);
+        generatePreviewFromData(firstPlateData);
+
         console.table(csvRows);
       } catch (error) {
         console.error(error);
@@ -892,7 +979,7 @@ function parseCsv(csvText) {
 
 
 // ===============================
-// PARSEAR EXCEL XLSX / XLS
+// PARSEAR EXCEL
 // ===============================
 
 function parseExcelFile(arrayBuffer) {
@@ -927,7 +1014,7 @@ function parseExcelFile(arrayBuffer) {
 
 
 // ===============================
-// EXTRAER DATOS DEL ARCHIVO
+// EXTRAER DATOS
 // ===============================
 
 function getPlateDataFromRow(row, index) {
@@ -947,7 +1034,7 @@ function getPlateDataFromRow(row, index) {
 
 
 // ===============================
-// DESCARGAR ZIP DESDE CSV / EXCEL
+// ZIP DESDE CSV / EXCEL
 // ===============================
 
 if (downloadAllSvgButton) {
@@ -989,7 +1076,7 @@ if (downloadAllSvgButton) {
 
 
 // ===============================
-// ZIP DESDE TABLA RÁPIDA
+// ZIP DESDE TABLA
 // ===============================
 
 if (downloadQuickZipButton) {
@@ -1032,7 +1119,7 @@ if (downloadQuickZipButton) {
 
 
 // ===============================
-// PDF DESDE TABLA RÁPIDA
+// PDF DESDE TABLA
 // ===============================
 
 if (downloadQuickPdfButton) {
@@ -1070,7 +1157,7 @@ if (downloadCsvPdfButton) {
 
 
 // ===============================
-// LIMPIAR TABLA RÁPIDA
+// LIMPIAR TABLA
 // ===============================
 
 if (clearQuickTableButton) {
@@ -1090,29 +1177,21 @@ if (clearQuickTableButton) {
 // EVENTOS DE AJUSTE VISUAL
 // ===============================
 
-function refreshCurrentPreviewIfPossible() {
-  updateAdjustmentLabels();
-
-  if (currentTemplateKey !== "equipo_frontal") {
-    return;
-  }
-
-  if (!baseSvgText) {
-    return;
-  }
-
-  generatePreviewFromIndividualForm();
-}
-
 [productoFontSizeInput, serialFontSizeInput, tipoFontSizeInput].forEach(function(input) {
   if (input) {
-    input.addEventListener("input", refreshCurrentPreviewIfPossible);
+    input.addEventListener("input", function() {
+      refreshPreviewUsingBestAvailableData();
+    });
+
+    input.addEventListener("change", function() {
+      refreshPreviewUsingBestAvailableData();
+    });
   }
 });
 
 if (refreshPreviewButton) {
   refreshPreviewButton.addEventListener("click", function() {
-    generatePreviewFromIndividualForm();
+    refreshPreviewUsingBestAvailableData();
   });
 }
 
