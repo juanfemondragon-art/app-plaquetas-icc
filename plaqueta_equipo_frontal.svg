@@ -20,13 +20,9 @@
 		v99.79C269.68,106.93,269.03,107.58,268.24,107.58z M5.89,5.92c-0.24,0-0.43,0.19-0.43,0.43v99.79c0,0.24,0.19,0.43,0.43,0.43
 		h262.35c0.24,0,0.43-0.19,0.43-0.43V6.36c0-0.24-0.19-0.43-0.43-0.43H5.89z"/>
 </g>
-<g>
-	<text transform="matrix(1 0 0 1 87.8963 81.2891)" class="st2 st3">{{PRODUCTO}}</text>
-</g>
-<g>
-	<text transform="matrix(1 0 0 1 233.4502 101.7859)" class="st4 st5">{{TIPO}}</text>
-</g>
-<text transform="matrix(1 0 0 1 96.5982 94.3308)" class="st6 st3">{{SERIAL}}</text>
+
+
+
 <g>
 	<g>
 		<path d="M33.63,27.67l2.4,3.32l-0.23,0.27l0.02,1.35l6.62,12.95c0,0-0.35,0.58,0.15,1.03c0.5,0.45,2.82,2.82,2.82,2.82
@@ -136,4 +132,8 @@
 		</g>
 	</g>
 </g>
+
+<text id="campo_producto" x="168" y="79" text-anchor="middle" dominant-baseline="middle" font-family="Montserrat, Arial, sans-serif" font-size="13.5" font-weight="700" fill="#000000">{{PRODUCTO}}</text>
+<text id="campo_serial" x="168" y="93" text-anchor="middle" dominant-baseline="middle" font-family="Montserrat, Arial, sans-serif" font-size="14" font-weight="900" fill="#000000">{{SERIAL}}</text>
+<text id="campo_tipo" x="263" y="101" text-anchor="end" dominant-baseline="middle" font-family="Montserrat, Arial, sans-serif" font-size="8.5" font-weight="600" fill="#000000">{{TIPO}}</text>
 </svg>
