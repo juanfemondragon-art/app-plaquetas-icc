@@ -29,6 +29,7 @@ let baseSvgText = "";
 let finalSvgText = "";
 let csvRows = [];
 
+
 // ===============================
 // CONFIGURACIÓN DE PLANTILLAS
 // ===============================
@@ -37,6 +38,8 @@ const templates = {
   shantui: {
     name: "Plaqueta maquinaria SHANTUI",
     svg: "plaqueta_base.svg",
+    fontFamily: "Arial Narrow, Arial, sans-serif",
+    defaultFontWeight: "400",
     fields: [
       {
         key: "MODELO",
@@ -98,6 +101,8 @@ const templates = {
   equipo_frontal: {
     name: "Plaqueta equipo frontal",
     svg: "plaqueta_equipo_frontal.svg",
+    fontFamily: "Montserrat, Arial, sans-serif",
+    defaultFontWeight: "600",
     fields: [
       {
         key: "PRODUCTO",
@@ -132,6 +137,7 @@ const templates = {
     ]
   }
 };
+
 
 // ===============================
 // FUNCIONES AUXILIARES
@@ -223,8 +229,9 @@ function resetGeneratedState() {
   }
 }
 
+
 // ===============================
-// RENDER DE FORMULARIO DINÁMICO
+// RENDER FORMULARIO INDIVIDUAL
 // ===============================
 
 function renderIndividualFields() {
@@ -266,6 +273,7 @@ function collectIndividualFormData() {
   return data;
 }
 
+
 // ===============================
 // TABLA RÁPIDA DINÁMICA
 // ===============================
@@ -277,7 +285,11 @@ function renderQuickTable() {
   quickRowsBody.innerHTML = "";
 
   const headRow = document.createElement("tr");
-  headRow.innerHTML = `<th>#</th>` + template.fields.map(field => `<th>${field.label}</th>`).join("");
+
+  headRow.innerHTML = `<th>#</th>` + template.fields.map(function(field) {
+    return `<th>${field.label}</th>`;
+  }).join("");
+
   quickTableHead.appendChild(headRow);
 
   for (let i = 1; i <= 10; i++) {
@@ -334,6 +346,7 @@ function getQuickTableRows() {
   return data;
 }
 
+
 // ===============================
 // CARGAR PLANTILLA SVG
 // ===============================
@@ -355,7 +368,7 @@ async function loadSvgTemplate(showAlert = false) {
     }
   } catch (error) {
     console.error(error);
-    alert("No se pudo cargar la plantilla SVG seleccionada. Revisa que el archivo exista en la raíz del proyecto.");
+    alert("No se pudo cargar la plantilla SVG seleccionada. Revisa que el archivo exista en la raíz del proyecto y tenga exactamente el mismo nombre.");
   }
 }
 
@@ -367,6 +380,64 @@ function applyTemplate(templateKey, showAlert = false) {
   resetGeneratedState();
   loadSvgTemplate(showAlert);
 }
+
+
+// ===============================
+// TIPOGRAFÍAS POR PLANTILLA
+// ===============================
+
+function getFontSettingsForField(fieldKey) {
+  const template = getCurrentTemplate();
+
+  let fontFamily = template.fontFamily || "Arial, sans-serif";
+  let fontWeight = template.defaultFontWeight || "400";
+
+  if (currentTemplateKey === "equipo_frontal") {
+    fontFamily = "Montserrat, Arial, sans-serif";
+
+    if (fieldKey === "SERIAL") {
+      fontWeight = "900";
+    } else {
+      fontWeight = "600";
+    }
+  }
+
+  if (currentTemplateKey === "shantui") {
+    fontFamily = "Arial Narrow, Arial, sans-serif";
+    fontWeight = "400";
+  }
+
+  return {
+    fontFamily,
+    fontWeight
+  };
+}
+
+function applyFontToElement(element, fieldKey) {
+  const fontSettings = getFontSettingsForField(fieldKey);
+  const fontFamily = fontSettings.fontFamily;
+  const fontWeight = fontSettings.fontWeight;
+  const primaryFont = fontFamily.split(",")[0].trim().replace(/["']/g, "");
+
+  element.setAttribute("font-family", fontFamily);
+  element.setAttribute("font-weight", fontWeight);
+
+  const currentStyle = element.getAttribute("style");
+
+  if (currentStyle) {
+    let newStyle = currentStyle;
+
+    newStyle = newStyle.replace(/font-family:[^;]+;?/g, "");
+    newStyle = newStyle.replace(/font-weight:[^;]+;?/g, "");
+
+    newStyle += `;font-family:'${primaryFont}', Arial, sans-serif;font-weight:${fontWeight};`;
+
+    element.setAttribute("style", newStyle);
+  } else {
+    element.setAttribute("style", `font-family:'${primaryFont}', Arial, sans-serif;font-weight:${fontWeight};`);
+  }
+}
+
 
 // ===============================
 // REEMPLAZAR MARCADORES EN SVG
@@ -384,54 +455,37 @@ function insertVariableTexts(svgText, data) {
   }
 
   const template = getCurrentTemplate();
-  const replacements = {};
-
-  template.fields.forEach(function(field) {
-    let value = data[field.key] || "";
-
-    if (field.key === "PIN") {
-      value = `>${value}<`;
-    }
-
-    replacements[`{{${field.key}}}`] = value;
-  });
-
   const textElements = svgDoc.querySelectorAll("text, tspan");
 
   textElements.forEach(function(element) {
     let content = element.textContent;
-    let wasReplaced = false;
+    let replacedFieldKey = null;
 
-    Object.keys(replacements).forEach(function(marker) {
+    template.fields.forEach(function(field) {
+      const marker = `{{${field.key}}}`;
+
       if (content.includes(marker)) {
-        content = content.replaceAll(marker, replacements[marker]);
-        wasReplaced = true;
+        let value = data[field.key] || "";
+
+        if (field.key === "PIN") {
+          value = `>${value}<`;
+        }
+
+        content = content.replaceAll(marker, value);
+        replacedFieldKey = field.key;
       }
     });
 
-    if (wasReplaced) {
+    if (replacedFieldKey) {
       element.textContent = content;
-
-      element.setAttribute("font-family", "Arial Narrow, Arial, sans-serif");
-      element.setAttribute("font-weight", "400");
-
-      const currentStyle = element.getAttribute("style");
-
-      if (currentStyle) {
-        let newStyle = currentStyle;
-        newStyle = newStyle.replace(/font-family:[^;]+;?/g, "");
-        newStyle = newStyle.replace(/font-weight:[^;]+;?/g, "");
-        newStyle += ";font-family:'Arial Narrow', Arial, sans-serif;font-weight:400;";
-        element.setAttribute("style", newStyle);
-      } else {
-        element.setAttribute("style", "font-family:'Arial Narrow', Arial, sans-serif;font-weight:400;");
-      }
+      applyFontToElement(element, replacedFieldKey);
     }
   });
 
   const serializer = new XMLSerializer();
   return serializer.serializeToString(svgDoc);
 }
+
 
 // ===============================
 // GENERAR PLAQUETA INDIVIDUAL
@@ -456,6 +510,7 @@ if (plateForm) {
   });
 }
 
+
 // ===============================
 // DESCARGAR SVG INDIVIDUAL
 // ===============================
@@ -478,8 +533,9 @@ if (downloadSvgButton) {
   });
 }
 
+
 // ===============================
-// PDF ÚNICO / INDIVIDUAL
+// GENERAR PDF
 // ===============================
 
 function generateMultiPlatePdfFromSvgList(svgList, fileTitle = "Plaquetas PDF") {
@@ -505,6 +561,8 @@ function generateMultiPlatePdfFromSvgList(svgList, fileTitle = "Plaquetas PDF") 
       <meta charset="UTF-8">
       <title>${fileTitle}</title>
       <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap');
+
         @page {
           size: 115mm 70mm;
           margin: 0;
@@ -546,11 +604,12 @@ function generateMultiPlatePdfFromSvgList(svgList, fileTitle = "Plaquetas PDF") 
     </head>
     <body>
       ${svgPages}
+
       <script>
         window.onload = function() {
           setTimeout(function() {
             window.print();
-          }, 700);
+          }, 800);
         };
       <\/script>
     </body>
@@ -589,6 +648,7 @@ if (downloadPdfButton) {
   });
 }
 
+
 // ===============================
 // DESCARGAR FORMATO CSV DINÁMICO
 // ===============================
@@ -611,6 +671,7 @@ if (downloadCsvTemplateButton) {
     downloadBlob(csvBlob, `formato_${currentTemplateKey}.csv`);
   });
 }
+
 
 // ===============================
 // LEER Y PROCESAR CSV
@@ -665,6 +726,7 @@ function parseCsv(csvText) {
   }
 
   const separator = lines[0].includes(";") ? ";" : ",";
+
   const headers = lines[0]
     .split(separator)
     .map(header => normalizeHeader(header));
@@ -703,6 +765,7 @@ function getPlateDataFromRow(row, index) {
   return plateData;
 }
 
+
 // ===============================
 // DESCARGAR ZIP DESDE CSV
 // ===============================
@@ -720,7 +783,7 @@ if (downloadAllSvgButton) {
     }
 
     if (typeof JSZip === "undefined") {
-      alert("No se pudo cargar JSZip.");
+      alert("No se pudo cargar JSZip. Revisa tu conexión a internet.");
       return;
     }
 
@@ -744,6 +807,7 @@ if (downloadAllSvgButton) {
   });
 }
 
+
 // ===============================
 // ZIP DESDE TABLA RÁPIDA
 // ===============================
@@ -756,7 +820,7 @@ if (downloadQuickZipButton) {
     }
 
     if (typeof JSZip === "undefined") {
-      alert("No se pudo cargar JSZip.");
+      alert("No se pudo cargar JSZip. Revisa tu conexión a internet.");
       return;
     }
 
@@ -786,6 +850,7 @@ if (downloadQuickZipButton) {
   });
 }
 
+
 // ===============================
 // PDF DESDE TABLA RÁPIDA
 // ===============================
@@ -802,6 +867,7 @@ if (downloadQuickPdfButton) {
     generateMultiPlatePdf(quickRows, "Plaquetas desde tabla rápida");
   });
 }
+
 
 // ===============================
 // PDF DESDE CSV
@@ -822,6 +888,7 @@ if (downloadCsvPdfButton) {
   });
 }
 
+
 // ===============================
 // LIMPIAR TABLA RÁPIDA
 // ===============================
@@ -838,6 +905,7 @@ if (clearQuickTableButton) {
   });
 }
 
+
 // ===============================
 // EVENTOS DE CAMBIO DE PLANTILLA
 // ===============================
@@ -853,6 +921,7 @@ if (loadTemplateButton) {
     loadSvgTemplate(true);
   });
 }
+
 
 // ===============================
 // INICIO
