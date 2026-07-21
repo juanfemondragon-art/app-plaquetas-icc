@@ -390,6 +390,47 @@ input[type="file"] {
   .quick-table-actions,
   .csv-actions {
     grid-template-columns: 1fr;
+
+/* ===============================
+   CORRECCIÓN FORMULARIO DINÁMICO
+================================ */
+
+#plateForm {
+  display: block;
+}
+
+.dynamic-form-fields {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.dynamic-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dynamic-field label {
+  display: block;
+  margin: 0 !important;
+  font-size: 12px;
+  font-weight: 700;
+  color: #374151;
+  line-height: 1.2;
+}
+
+.dynamic-field input {
+  width: 100%;
+  margin: 0 !important;
+}
+
+@media (min-width: 760px) {
+  .dynamic-form-fields {
+    grid-template-columns: 1fr 1fr;
+  }
+}     
   }
 }
   }
