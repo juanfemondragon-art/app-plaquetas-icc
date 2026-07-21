@@ -87,22 +87,22 @@
 
       <hr />
 
-      <h3>Carga masiva CSV</h3>
+      <h3>Carga masiva CSV / Excel</h3>
 
       <p class="intro">
-        Descargue el formato CSV de la plantilla actual, llénelo y súbalo para generar varias plaquetas al tiempo.
+        Descargue el formato de la plantilla actual, llénelo en Excel o CSV y súbalo para generar varias plaquetas al tiempo.
       </p>
 
       <button id="downloadCsvTemplate" class="secondary-button" type="button">
         Descargar formato CSV
       </button>
 
-      <label for="csvFile">Archivo CSV</label>
-      <input type="file" id="csvFile" accept=".csv" />
+      <label for="csvFile">Archivo CSV o Excel</label>
+      <input type="file" id="csvFile" accept=".csv,.xlsx,.xls" />
 
       <div class="csv-actions">
         <button id="processCsv" class="secondary-button" type="button">
-          Procesar CSV
+          Procesar archivo
         </button>
 
         <button id="downloadAllSvg" class="secondary-button" type="button" disabled>
@@ -110,7 +110,7 @@
         </button>
 
         <button id="downloadCsvPdf" class="secondary-button" type="button" disabled>
-          Generar PDF único desde CSV
+          Generar PDF único desde archivo
         </button>
       </div>
     </section>
@@ -126,6 +126,7 @@
   </main>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="app.js"></script>
 
 </body>
