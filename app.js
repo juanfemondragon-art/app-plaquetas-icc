@@ -24,6 +24,17 @@ const downloadQuickZipButton = document.getElementById("downloadQuickZip");
 const downloadQuickPdfButton = document.getElementById("downloadQuickPdf");
 const clearQuickTableButton = document.getElementById("clearQuickTable");
 
+const equipoFrontalAdjustments = document.getElementById("equipoFrontalAdjustments");
+const refreshPreviewButton = document.getElementById("refreshPreview");
+
+const productoFontSizeInput = document.getElementById("productoFontSize");
+const serialFontSizeInput = document.getElementById("serialFontSize");
+const tipoFontSizeInput = document.getElementById("tipoFontSize");
+
+const productoFontSizeValue = document.getElementById("productoFontSizeValue");
+const serialFontSizeValue = document.getElementById("serialFontSizeValue");
+const tipoFontSizeValue = document.getElementById("tipoFontSizeValue");
+
 let currentTemplateKey = "shantui";
 let baseSvgText = "";
 let finalSvgText = "";
@@ -117,7 +128,7 @@ const templates = {
     name: "Plaqueta equipo frontal",
     svg: "plaqueta_equipo_frontal.svg",
     fontFamily: "Montserrat, Arial, sans-serif",
-    defaultFontWeight: "600",
+    defaultFontWeight: "700",
     fields: [
       {
         key: "PRODUCTO",
@@ -243,6 +254,44 @@ function resetGeneratedState() {
 
   if (csvFileInput) {
     csvFileInput.value = "";
+  }
+}
+
+function getAdjustmentValue(inputElement, fallback) {
+  if (!inputElement) {
+    return fallback;
+  }
+
+  const value = Number(inputElement.value);
+
+  if (isNaN(value)) {
+    return fallback;
+  }
+
+  return value;
+}
+
+function updateAdjustmentLabels() {
+  if (productoFontSizeValue && productoFontSizeInput) {
+    productoFontSizeValue.textContent = productoFontSizeInput.value;
+  }
+
+  if (serialFontSizeValue && serialFontSizeInput) {
+    serialFontSizeValue.textContent = serialFontSizeInput.value;
+  }
+
+  if (tipoFontSizeValue && tipoFontSizeInput) {
+    tipoFontSizeValue.textContent = tipoFontSizeInput.value;
+  }
+}
+
+function updateAdjustmentPanelVisibility() {
+  if (!equipoFrontalAdjustments) return;
+
+  if (currentTemplateKey === "equipo_frontal") {
+    equipoFrontalAdjustments.classList.remove("hidden");
+  } else {
+    equipoFrontalAdjustments.classList.add("hidden");
   }
 }
 
@@ -395,6 +444,7 @@ function applyTemplate(templateKey, showAlert = false) {
   renderIndividualFields();
   renderQuickTable();
   resetGeneratedState();
+  updateAdjustmentPanelVisibility();
   loadSvgTemplate(showAlert);
 }
 
@@ -460,35 +510,35 @@ function applyFontToElement(element, fieldKey) {
 
 function positionEquipoFrontalText(element, fieldKey) {
   element.removeAttribute("transform");
+  element.removeAttribute("textLength");
+  element.removeAttribute("lengthAdjust");
+
+  const productoSize = getAdjustmentValue(productoFontSizeInput, 13.5);
+  const serialSize = getAdjustmentValue(serialFontSizeInput, 14);
+  const tipoSize = getAdjustmentValue(tipoFontSizeInput, 8.5);
 
   if (fieldKey === "PRODUCTO") {
-    element.setAttribute("x", "72");
+    element.setAttribute("x", "165");
     element.setAttribute("y", "82");
-    element.setAttribute("text-anchor", "start");
-    element.setAttribute("font-size", "12.8");
+    element.setAttribute("text-anchor", "middle");
+    element.setAttribute("font-size", productoSize);
     element.setAttribute("font-weight", "700");
-    element.setAttribute("textLength", "178");
-    element.setAttribute("lengthAdjust", "spacing");
   }
 
   if (fieldKey === "SERIAL") {
-    element.setAttribute("x", "87");
+    element.setAttribute("x", "165");
     element.setAttribute("y", "96");
-    element.setAttribute("text-anchor", "start");
-    element.setAttribute("font-size", "13.4");
+    element.setAttribute("text-anchor", "middle");
+    element.setAttribute("font-size", serialSize);
     element.setAttribute("font-weight", "900");
-    element.setAttribute("textLength", "135");
-    element.setAttribute("lengthAdjust", "spacing");
   }
 
   if (fieldKey === "TIPO") {
     element.setAttribute("x", "263");
     element.setAttribute("y", "102");
     element.setAttribute("text-anchor", "end");
-    element.setAttribute("font-size", "8.4");
+    element.setAttribute("font-size", tipoSize);
     element.setAttribute("font-weight", "600");
-    element.removeAttribute("textLength");
-    element.removeAttribute("lengthAdjust");
   }
 }
 
@@ -546,25 +596,33 @@ function insertVariableTexts(svgText, data) {
 
 
 // ===============================
+// GENERAR VISTA PREVIA
+// ===============================
+
+function generatePreviewFromIndividualForm() {
+  if (!baseSvgText) {
+    alert("Primero debes cargar la plantilla SVG.");
+    return;
+  }
+
+  const plateData = collectIndividualFormData();
+
+  finalSvgText = insertVariableTexts(baseSvgText, plateData);
+  platePreview.innerHTML = finalSvgText;
+
+  if (downloadSvgButton) downloadSvgButton.disabled = false;
+  if (downloadPdfButton) downloadPdfButton.disabled = false;
+}
+
+
+// ===============================
 // GENERAR PLAQUETA INDIVIDUAL
 // ===============================
 
 if (plateForm) {
   plateForm.addEventListener("submit", function(event) {
     event.preventDefault();
-
-    if (!baseSvgText) {
-      alert("Primero debes cargar la plantilla SVG.");
-      return;
-    }
-
-    const plateData = collectIndividualFormData();
-
-    finalSvgText = insertVariableTexts(baseSvgText, plateData);
-    platePreview.innerHTML = finalSvgText;
-
-    if (downloadSvgButton) downloadSvgButton.disabled = false;
-    if (downloadPdfButton) downloadPdfButton.disabled = false;
+    generatePreviewFromIndividualForm();
   });
 }
 
@@ -793,7 +851,6 @@ if (processCsvButton) {
 
 // ===============================
 // PARSEAR CSV
-// Acepta separador coma , o punto y coma ;
 // ===============================
 
 function parseCsv(csvText) {
@@ -1030,6 +1087,37 @@ if (clearQuickTableButton) {
 
 
 // ===============================
+// EVENTOS DE AJUSTE VISUAL
+// ===============================
+
+function refreshCurrentPreviewIfPossible() {
+  updateAdjustmentLabels();
+
+  if (currentTemplateKey !== "equipo_frontal") {
+    return;
+  }
+
+  if (!baseSvgText) {
+    return;
+  }
+
+  generatePreviewFromIndividualForm();
+}
+
+[productoFontSizeInput, serialFontSizeInput, tipoFontSizeInput].forEach(function(input) {
+  if (input) {
+    input.addEventListener("input", refreshCurrentPreviewIfPossible);
+  }
+});
+
+if (refreshPreviewButton) {
+  refreshPreviewButton.addEventListener("click", function() {
+    generatePreviewFromIndividualForm();
+  });
+}
+
+
+// ===============================
 // EVENTOS DE CAMBIO DE PLANTILLA
 // ===============================
 
@@ -1055,6 +1143,8 @@ window.addEventListener("DOMContentLoaded", function() {
     currentTemplateKey = templateSelector.value;
   }
 
+  updateAdjustmentLabels();
+  updateAdjustmentPanelVisibility();
   renderIndividualFields();
   renderQuickTable();
   loadSvgTemplate(false);
