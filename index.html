@@ -40,31 +40,85 @@
         <h3>Ajustes visuales de texto</h3>
 
         <p class="intro">
-          Ajuste el tamaño del texto y actualice la vista previa antes de generar el PDF.
+          Ajuste tamaño y posición del texto antes de generar el PDF.
         </p>
+
+        <h4>Producto</h4>
 
         <div class="adjustment-row">
           <div class="adjustment-label-row">
             <label for="productoFontSize">Tamaño producto</label>
             <span id="productoFontSizeValue">13.5</span>
           </div>
-          <input type="range" id="productoFontSize" min="8" max="20" step="0.2" value="13.5">
+          <input type="range" id="productoFontSize" min="6" max="24" step="0.2" value="13.5">
         </div>
+
+        <div class="adjustment-row">
+          <div class="adjustment-label-row">
+            <label for="productoX">Mover producto horizontal</label>
+            <span id="productoXValue">168</span>
+          </div>
+          <input type="range" id="productoX" min="80" max="260" step="1" value="168">
+        </div>
+
+        <div class="adjustment-row">
+          <div class="adjustment-label-row">
+            <label for="productoY">Mover producto vertical</label>
+            <span id="productoYValue">79</span>
+          </div>
+          <input type="range" id="productoY" min="55" max="100" step="1" value="79">
+        </div>
+
+        <h4>Serial</h4>
 
         <div class="adjustment-row">
           <div class="adjustment-label-row">
             <label for="serialFontSize">Tamaño serial</label>
             <span id="serialFontSizeValue">14</span>
           </div>
-          <input type="range" id="serialFontSize" min="8" max="20" step="0.2" value="14">
+          <input type="range" id="serialFontSize" min="6" max="24" step="0.2" value="14">
         </div>
+
+        <div class="adjustment-row">
+          <div class="adjustment-label-row">
+            <label for="serialX">Mover serial horizontal</label>
+            <span id="serialXValue">168</span>
+          </div>
+          <input type="range" id="serialX" min="80" max="260" step="1" value="168">
+        </div>
+
+        <div class="adjustment-row">
+          <div class="adjustment-label-row">
+            <label for="serialY">Mover serial vertical</label>
+            <span id="serialYValue">93</span>
+          </div>
+          <input type="range" id="serialY" min="65" max="110" step="1" value="93">
+        </div>
+
+        <h4>Tipo</h4>
 
         <div class="adjustment-row">
           <div class="adjustment-label-row">
             <label for="tipoFontSize">Tamaño tipo</label>
             <span id="tipoFontSizeValue">8.5</span>
           </div>
-          <input type="range" id="tipoFontSize" min="6" max="14" step="0.2" value="8.5">
+          <input type="range" id="tipoFontSize" min="5" max="16" step="0.2" value="8.5">
+        </div>
+
+        <div class="adjustment-row">
+          <div class="adjustment-label-row">
+            <label for="tipoX">Mover tipo horizontal</label>
+            <span id="tipoXValue">263</span>
+          </div>
+          <input type="range" id="tipoX" min="190" max="285" step="1" value="263">
+        </div>
+
+        <div class="adjustment-row">
+          <div class="adjustment-label-row">
+            <label for="tipoY">Mover tipo vertical</label>
+            <span id="tipoYValue">101</span>
+          </div>
+          <input type="range" id="tipoY" min="75" max="120" step="1" value="101">
         </div>
 
         <button id="refreshPreview" class="secondary-button" type="button">
