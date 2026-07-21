@@ -100,14 +100,8 @@ hr {
    FORMULARIOS
 ================================ */
 
-form {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px 14px;
-}
-
-form label {
-  grid-column: span 1;
+#plateForm {
+  display: block;
 }
 
 label {
@@ -118,7 +112,8 @@ label {
   margin-bottom: 6px;
 }
 
-input {
+input,
+select {
   width: 100%;
   padding: 12px 13px;
   border: 1px solid #d1d5db;
@@ -134,18 +129,45 @@ input::placeholder {
   color: #9ca3af;
 }
 
-input:focus {
+input:focus,
+select:focus {
   border-color: var(--color-orange);
   box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.12);
 }
 
-/* Ajuste para que cada label/input funcione bien en grid */
-form label {
-  margin-bottom: -8px;
+.template-selector-wrap {
+  margin-bottom: 18px;
 }
 
-form input {
-  margin-bottom: 2px;
+.template-selector-wrap select {
+  cursor: pointer;
+}
+
+.dynamic-form-fields {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.dynamic-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dynamic-field label {
+  display: block;
+  margin: 0 !important;
+  font-size: 12px;
+  font-weight: 700;
+  color: #374151;
+  line-height: 1.2;
+}
+
+.dynamic-field input {
+  width: 100%;
+  margin: 0 !important;
 }
 
 /* ===============================
@@ -295,6 +317,14 @@ button:disabled,
   border-radius: 8px;
 }
 
+.quick-table-actions,
+.csv-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 12px;
+}
+
 /* ===============================
    INPUT FILE
 ================================ */
@@ -309,6 +339,12 @@ input[type="file"] {
    RESPONSIVE
 ================================ */
 
+@media (min-width: 760px) {
+  .dynamic-form-fields {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 @media (max-width: 1200px) {
   .app-container {
     grid-template-columns: 1fr;
@@ -317,6 +353,17 @@ input[type="file"] {
   .preview-section {
     position: relative;
     top: auto;
+  }
+}
+
+@media (max-width: 900px) {
+  .dynamic-form-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-table-actions,
+  .csv-actions {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -331,10 +378,6 @@ input[type="file"] {
     border-radius: 16px;
   }
 
-  form {
-    grid-template-columns: 1fr;
-  }
-
   h1 {
     font-size: 24px;
   }
@@ -342,96 +385,5 @@ input[type="file"] {
   .plate-preview {
     min-height: 280px;
     padding: 14px;
-
-     .template-selector-wrap {
-  margin-bottom: 18px;
-}
-
-.template-selector-wrap select {
-  width: 100%;
-  padding: 12px 13px;
-  border: 1px solid #d1d5db;
-  border-radius: 12px;
-  font-size: 14px;
-  outline: none;
-  background: #ffffff;
-  color: #111827;
-}
-
-.dynamic-form-fields {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-}
-
-.dynamic-field {
-  display: flex;
-  flex-direction: column;
-}
-
-.dynamic-field label {
-  margin-bottom: 6px !important;
-}
-
-.quick-table-actions,
-.csv-actions {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-top: 12px;
-}
-
-@media (max-width: 900px) {
-  .dynamic-form-fields {
-    grid-template-columns: 1fr;
-  }
-
-  .quick-table-actions,
-  .csv-actions {
-    grid-template-columns: 1fr;
-
-/* ===============================
-   CORRECCIÓN FORMULARIO DINÁMICO
-================================ */
-
-#plateForm {
-  display: block;
-}
-
-.dynamic-form-fields {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 14px;
-  margin-bottom: 14px;
-}
-
-.dynamic-field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.dynamic-field label {
-  display: block;
-  margin: 0 !important;
-  font-size: 12px;
-  font-weight: 700;
-  color: #374151;
-  line-height: 1.2;
-}
-
-.dynamic-field input {
-  width: 100%;
-  margin: 0 !important;
-}
-
-@media (min-width: 760px) {
-  .dynamic-form-fields {
-    grid-template-columns: 1fr 1fr;
-  }
-}     
-  }
-}
   }
 }
