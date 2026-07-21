@@ -430,6 +430,31 @@ function getFontSettingsForField(fieldKey) {
   };
 }
 
+function getSvgViewBoxSize(element) {
+  const svgRoot = element.ownerDocument.querySelector("svg");
+
+  let width = 1150;
+  let height = 700;
+
+  if (svgRoot) {
+    const viewBox = svgRoot.getAttribute("viewBox");
+
+    if (viewBox) {
+      const parts = viewBox.split(/\s+/).map(Number);
+
+      if (parts.length === 4) {
+        if (!isNaN(parts[2])) width = parts[2];
+        if (!isNaN(parts[3])) height = parts[3];
+      }
+    }
+  }
+
+  return {
+    width,
+    height
+  };
+}
+
 function applyFontToElement(element, fieldKey) {
   const fontSettings = getFontSettingsForField(fieldKey);
   const fontFamily = fontSettings.fontFamily;
@@ -446,12 +471,47 @@ function applyFontToElement(element, fieldKey) {
 
     newStyle = newStyle.replace(/font-family:[^;]+;?/g, "");
     newStyle = newStyle.replace(/font-weight:[^;]+;?/g, "");
+    newStyle = newStyle.replace(/text-anchor:[^;]+;?/g, "");
 
     newStyle += `;font-family:'${primaryFont}', Arial, sans-serif;font-weight:${fontWeight};`;
 
     element.setAttribute("style", newStyle);
   } else {
     element.setAttribute("style", `font-family:'${primaryFont}', Arial, sans-serif;font-weight:${fontWeight};`);
+  }
+
+  // Ajustes especiales para la plaqueta de equipo frontal.
+  // Estos valores centran y comprimen el texto para que no se salga del margen.
+  if (currentTemplateKey === "equipo_frontal") {
+    const svgSize = getSvgViewBoxSize(element);
+    const viewBoxWidth = svgSize.width;
+
+    if (fieldKey === "PRODUCTO") {
+      element.setAttribute("text-anchor", "middle");
+      element.setAttribute("x", viewBoxWidth * 0.62);
+      element.setAttribute("textLength", viewBoxWidth * 0.48);
+      element.setAttribute("lengthAdjust", "spacingAndGlyphs");
+      element.setAttribute("font-size", "34");
+      element.setAttribute("font-weight", "700");
+    }
+
+    if (fieldKey === "SERIAL") {
+      element.setAttribute("text-anchor", "middle");
+      element.setAttribute("x", viewBoxWidth * 0.62);
+      element.setAttribute("textLength", viewBoxWidth * 0.36);
+      element.setAttribute("lengthAdjust", "spacingAndGlyphs");
+      element.setAttribute("font-size", "34");
+      element.setAttribute("font-weight", "900");
+    }
+
+    if (fieldKey === "TIPO") {
+      element.setAttribute("text-anchor", "end");
+      element.setAttribute("x", viewBoxWidth * 0.96);
+      element.setAttribute("font-size", "24");
+      element.setAttribute("font-weight", "600");
+      element.removeAttribute("textLength");
+      element.removeAttribute("lengthAdjust");
+    }
   }
 }
 
